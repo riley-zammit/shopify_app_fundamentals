@@ -1,5 +1,6 @@
 class AuthenticationController < ApplicationController
-    #shopify_api gem: https://github.com/shopify/shopify_api
+    #using shopify_api gem: https://github.com/shopify/shopify_api
+
     def authenticate
         #'shop' parameter is passed in the query string on app load
         shop_name = params[:shop]
