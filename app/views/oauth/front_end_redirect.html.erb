@@ -1,0 +1,4 @@
+<%= content_tag :div, style:"display:none", id: "url-data", data: {permission_url: @accept_permissions_url, api_key: @api_key, shop_name: @shop_name} do%>
+<% end %>
+<%# ALL DATA DOESN"T SEEM TO BE BEING PASSED?? INVESTIGATE THE DATA IN DEBUGGER %>
+<%= javascript_pack_tag 'app_bridge_auth_redirect'%>

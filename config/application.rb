@@ -14,8 +14,10 @@ module ShopifyAppFoundation
     #-----CONFIG SHOPIFY APP------
     config.api_key = ENV['SHOPIFY_API_KEY']
     config.api_secret = ENV['SHOPIFY_API_SECRET']
+    config.api_version = "2021-01"
 
-    config.app_root = "https://rjz.ngrok.io"
+    config.app_root = "https://rjz.ngrok.io/"
     config.scope = "write_customers" #grants read/write
+    config.hosts << "rjz.ngrok.io"
   end
 end
