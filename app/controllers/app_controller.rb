@@ -3,12 +3,16 @@ class AppController < ApplicationController
   before_action :authenticate_request
   def index
 
-    if new_auth_flow?()
-      redirect_to controller: 'oauth', action: 'authenticate', shop: params[:shop], timestamp: params[:timestamp], hmac: params[:hmac] and return
-    elsif !existing_installation()
-      complete_oauth_flow()
+    
+    if !existing_installation()
+      if new_auth_flow?()
+        redirect_to controller: 'oauth', action: 'authenticate', shop: params[:shop], timestamp: params[:timestamp], hmac: params[:hmac] and return
+      else
+        complete_oauth_flow()
+      end
     end
 
+    @shop=Shop.find_by(shop_name: params[:shop])
     @shop_origin = @shop.shop_name
     @api_key = Rails.configuration.api_key
     
@@ -17,11 +21,7 @@ class AppController < ApplicationController
 
   private
     def existing_installation
-      @shop = Shop.find_by(shop_name: params[:shop])
-      if @shop
-        return true
-      end
-      false
+      Shop.exists?(shop_name: params[:shop])
     end
 
     #------Helper methods to complete the oauth flow-------

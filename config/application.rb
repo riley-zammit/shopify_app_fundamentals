@@ -17,7 +17,7 @@ module ShopifyAppFoundation
     config.api_version = "2021-01"
 
     config.app_root = "https://rjz.ngrok.io/"
-    config.scope = "write_customers" #grants read/write
+    config.scope = "write_customers,write_products,write_orders" #grants read/write
     config.hosts << "rjz.ngrok.io"
   end
 end
