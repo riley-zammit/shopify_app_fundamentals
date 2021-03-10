@@ -1,6 +1,30 @@
+<div class='d-flex align-items-center flex-column'>
+
+    <div class='d-flex justify-content-center align-items-center margin-vertical'>
+        <h1>Shopify App Fundamentals - EmailBlast</h1>
+    </div>
+
+    <div class='d-flex flex-column'>
+        <div class='d-flex justify-content-between'>
+            <button>Select billing plan</button>
+            <button>Send email</button>
+        </div>
+        <div class='d-flex flex-column align-items-center margin-vertical'>
+            <span>Emails sent:</span>
+            <span>Free tier remaining:</span>
+            <%if @shop.plan%>
+                <%=link_to "Upgrade your plan", update_billing_path()%>
+            <%else%>
+                <%=link_to "Select your plan", new_billing_path() %>
+            <%end%>
+        </div>
+    </div>
+    
+    
+</div>
+
+
 <%= content_tag :div, style:"display:none", id: "url-data", data: {api_key: @api_key, shop_origin: @shop_origin} do%>
 <% end %>
-<h1>Hello World</h1>
-<p>Find me in app/views/app/index.html.erb</p>
 
 <%= javascript_pack_tag 'app_bridge_init'%>

@@ -13,3 +13,47 @@
  *= require_tree .
  *= require_self
  */
+
+.d-flex {
+    display: flex;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.justify-content-center {
+    justify-content: center;
+}
+
+.justify-content-between {
+    justify-content: space-between;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.margin-vertical {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.margin-horizontal {
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.padding-vertical {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.padding-horizontal {
+    padding-left: 20px;
+    padding-right: 20px;
+}

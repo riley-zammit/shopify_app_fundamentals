@@ -1,9 +1,9 @@
 
 class AppController < ApplicationController
   before_action :authenticate_request
-  def index
 
-    
+  def index
+  
     if !existing_installation()
       if new_auth_flow?()
         redirect_to controller: 'oauth', action: 'authenticate', shop: params[:shop], timestamp: params[:timestamp], hmac: params[:hmac] and return
