@@ -1,6 +1,6 @@
 
 class AppController < ApplicationController
-  before_action :authenticate_request
+  before_action :authenticate_shopify_request
 
   def index
   

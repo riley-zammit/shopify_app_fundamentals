@@ -29,7 +29,7 @@ class ApplicationController < ActionController::Base
         end
 
         #---methods to validate requests from shopify-----
-        def authenticate_request
+        def authenticate_shopify_request
             unless hmac_valid?()
                 unauthorized() and return
             end
