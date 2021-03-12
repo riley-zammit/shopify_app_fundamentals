@@ -10,6 +10,14 @@
   </head>
 
   <body>
-    <%= yield %>
+
+    <!-- show the user something while the app fetches the session token -->
+    <div id='loading-message'>
+      Loading session token...
+    </div>
+    <div id='main-content' class='d-none justify-content-center'>
+      <div id='loading' class='d-none'>Loading...</div>
+      <%= yield %>
+    </div>
   </body>
 </html>

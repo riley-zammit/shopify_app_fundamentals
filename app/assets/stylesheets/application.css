@@ -18,6 +18,10 @@
     display: flex;
 }
 
+.d-none {
+    display: none;
+}
+
 .flex-column {
     flex-direction: column;
 }
@@ -46,6 +50,11 @@
 .margin-horizontal {
     margin-left: 20px;
     margin-right: 20px;
+}
+
+.mv-0 {
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .padding-vertical {

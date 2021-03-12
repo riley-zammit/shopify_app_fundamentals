@@ -14,7 +14,7 @@ class OauthController < ApplicationController
     @api_key = Rails.configuration.api_key
     
     #in an embedded app, you need to redirect on the front end by using app bridge
-    render :front_end_redirect
+    render :front_end_redirect, layout:false
 end
 
 private

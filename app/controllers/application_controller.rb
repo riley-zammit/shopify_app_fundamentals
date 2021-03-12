@@ -18,14 +18,9 @@ class ApplicationController < ActionController::Base
                 @shopify_session = ShopifyAPI::Session.new(domain: params[:shop], api_version: Rails.configuration.api_version, token:nil)
             end
         end
-
-        #allow app to be embedded in Shopify admin by removing x-frame-options header
-        def allow_iframe
-            response.headers.except!('X-Frame-Options')
-        end
-
-        def unauthorized
-            render(file: "public/401.html", status: :unauthorized)
+        
+        def authenticate_user_request
+            debug=0
         end
 
         #---methods to validate requests from shopify-----
@@ -43,6 +38,16 @@ class ApplicationController < ActionController::Base
             secret = Rails.configuration.api_secret
             computed_hmac = OpenSSL::HMAC.hexdigest('sha256', secret, params_string)
             ActiveSupport::SecurityUtils.secure_compare(computed_hmac, params[:hmac])
+        end
+
+        #----------------misc utility methods------------
+        #allow app to be embedded in Shopify admin by removing x-frame-options header
+        def allow_iframe
+            response.headers.except!('X-Frame-Options')
+        end
+
+        def unauthorized
+            render(file: "public/401.html", status: :unauthorized)
         end
     
 end
