@@ -1,21 +1,19 @@
 class BillingController < AuthenticatedController
     
-    #show shop's current plan
     def show
-        
         plan = shopify_get_current_subscription()
         render json:{plan:plan}
     end
     
-    #change plan
     def update
         plan = Plan.find_by(name: params[:plan])
         #activate new billing plan on Shopify
-        shopify_update_subscription(plan)
-        render json: {plan:plan}
+        response = shopify_update_subscription(plan)
+        @shop.update(shopify_subs_id: response.data.appSubscriptionCreate.appSubscription.id)
+        #redirect the merchant to Shopify to accept the charge
+        redirect_to response.data.appSubscriptionCreate.confirmationUrl
     end
 
-    #email sent
     def send_email_and_charge
         plan = @shop.plan
         monthly_emails_to_date = @shop.email_records.this_month().to_a()
@@ -35,13 +33,36 @@ class BillingController < AuthenticatedController
         def shopify_update_subscription(plan)
             #@shopify_gql_client instantiated in ApplicationController
             UpdateSubsription = @shopify_gql_client.parse <<-'GRAPHQL'
-            mutation{
+            mutation($name: String!, $amount: Decimal!, $cappedAmount:Decimal!, $returnUrl:URL!, $trialDays:Int){
                 appSubscriptionCreate(
-                    name: plan.name,
-                    lineItems: 
-                    returnUrl: Rails.configuration.app_root,
                     test:true,
-                    trialDays: plan.trial_days
+                    name: $name,
+                    lineItems: [
+                        {
+                            plan:{
+                                appRecurringPricingDetails:{
+                                interval:EVERY_30_DAYS,
+                                price:{
+                                    amount: $amount,
+                                    currencyCode: USD
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            plan:{
+                                appUsagePricingDetails:{
+                                    cappedAmount:{
+                                        amount:1000,
+                                        currencyCode: USD
+                                    }
+                                    terms:"terms example"
+                                }
+                            }
+                        }
+                    ]
+                    returnUrl: $returnUrl,
+                    trialDays: $trialDays
                 ){
                     appSubscription{
                         id
@@ -55,14 +76,91 @@ class BillingController < AuthenticatedController
             }
             GRAPHQL
 
-            #create the new subscription. Any existing subscription will be auto-cancelled
+            variables = {
+                name: plan.name, 
+                amount: plan.cost_monthly, 
+                returnUrl: Rails.configuration.app_root, 
+                trialDays: plan.trial_days
+            }
 
+            result = @shopify_gql_client.query(UpdateSubsription, variables: variables)
+            return result
         end
 
-        def shopify_create_usage_charge
+        def shopify_create_usage_charge(subscription_id)
+            UsageCharge = @shopify_gql_client.parse <<-'GRAPHQL'
+            mutation($description:String!, $amount:Decimal!, $id:ID!){
+                appUsageRecordCreate(
+                    subscriptionLineItemId:$id,
+                    description: $description,
+                    price: {
+                        amount: $amount,
+                        currencyCode: USD
+                    }                    
+                )
+                {
+                    appUsageRecord{
+                        id
+                        subscriptionLineItem{
+                            usageRecords{
+                                edges{
+                                    node{
+                                        description
+                                        createdAt
+                                        price{
+                                            amount
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    userErrors{
+                        field
+                        message
+                    }
+                }
+            }
+            GRAPHQL
         end
 
         def shopify_get_current_subscription
+            CurrentSubscriptionQuery = @shopify_gql_client.parse <<-'GRAPHQL'
+            query{
+                currentAppInstallation{
+                    activeSubscriptions{
+                        name
+                        currentPeriodEnd
+                        trialDays
+                        lineItems{
+                            plan{
+                                pricingDetails{
+                                    ...on AppRecurringPricing{
+                                    interval
+                                    price{
+                                        amount
+                                        }
+                                    }
+                                }
+                            }
+                            usageRecords(first:10){
+                                edges{
+                                    node{
+                                        createdAt
+                                        description
+                                        price{
+                                            amount
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            GRAPHQL
+
+            response = @shopify_gql_client.query(CurrentSubscriptionQuery)
         end
 
 

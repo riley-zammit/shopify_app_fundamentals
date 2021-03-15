@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_15_173532) do
+ActiveRecord::Schema.define(version: 2021_03_15_204836) do
 
   create_table "email_records", force: :cascade do |t|
     t.datetime "sent"
@@ -48,6 +48,7 @@ ActiveRecord::Schema.define(version: 2021_03_15_173532) do
     t.datetime "updated_at", precision: 6, null: false
     t.integer "plan_id"
     t.string "plan_name"
+    t.string "shopify_subs_id"
     t.index ["plan_id"], name: "index_shops_on_plan_id"
   end
 
