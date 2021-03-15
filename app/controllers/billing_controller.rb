@@ -1,6 +1,7 @@
 class BillingController < AuthenticatedController
     
     def show
+        render json:{plans: Plan.all}
     end
     
     def update

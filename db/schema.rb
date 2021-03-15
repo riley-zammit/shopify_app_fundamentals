@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_09_195919) do
+ActiveRecord::Schema.define(version: 2021_03_15_132812) do
 
   create_table "nonces", force: :cascade do |t|
     t.string "nonce"
@@ -20,12 +20,24 @@ ActiveRecord::Schema.define(version: 2021_03_09_195919) do
     t.boolean "is_complete"
   end
 
+  create_table "plans", force: :cascade do |t|
+    t.string "name"
+    t.integer "cost_monthly"
+    t.integer "trial_days"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "display_name"
+    t.text "description"
+  end
+
   create_table "shops", force: :cascade do |t|
     t.string "token"
     t.string "shop_name"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.string "plan"
+    t.integer "plan_id"
+    t.index ["plan_id"], name: "index_shops_on_plan_id"
   end
 
+  add_foreign_key "shops", "plans"
 end

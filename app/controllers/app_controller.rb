@@ -16,7 +16,7 @@ class AppController < ApplicationController
     @shop_origin = @shop.shop_name
     @api_key = Rails.configuration.api_key
     
-    #automatically renders index
+    #automatically renders index.html
   end
 
   private
