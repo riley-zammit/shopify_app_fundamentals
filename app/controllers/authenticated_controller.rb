@@ -26,5 +26,6 @@ class AuthenticatedController < ApplicationController
             unless dest_tld == iss_tld
                 raise AuthenticationError("top level domains don't match!")
             end
+            @shop = Shop.find_by shop_name: dest_tld
         end
 end

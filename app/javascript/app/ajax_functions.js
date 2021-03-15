@@ -9,7 +9,7 @@ export function sendEmailAndCharge(to, subject = "", app) {
 }
 
 /*Billing*/
-export function getCurrentPlan(planName) {
+export function updatePlan(planName) {
     const endpoint = "https://" + domain + "/billing/update/" + planName;
     const authString = 'Bearer ' + window.authToken;
     setLoading(true);

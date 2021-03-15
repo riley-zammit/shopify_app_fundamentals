@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  sent: 2021-03-15 13:14:52
+  subject: MyString
+  to: MyString
+  shop: one
+
+two:
+  sent: 2021-03-15 13:14:52
+  subject: MyString
+  to: MyString
+  shop: two

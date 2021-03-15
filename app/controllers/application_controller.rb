@@ -13,6 +13,7 @@ class ApplicationController < ActionController::Base
                 shop = Shop.find_by(shop_name: params[:shop])
                 @shopify_session = ShopifyAPI::Session.new(domain: shop.shop_name, token: shop.token, api_version: version)
                 ShopifyAPI::Base.activate_session(@shopify_session)
+                @shopify_gql_client = ShopifyAPI::GraphQL.client
             else
                 ShopifyAPI::Session.setup(api_key: Rails.configuration.api_key, secret: Rails.configuration.api_secret)
                 @shopify_session = ShopifyAPI::Session.new(domain: params[:shop], api_version: Rails.configuration.api_version, token:nil)

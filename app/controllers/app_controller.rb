@@ -15,7 +15,7 @@ class AppController < ApplicationController
     @shop=Shop.find_by(shop_name: params[:shop])
     @shop_origin = @shop.shop_name
     @api_key = Rails.configuration.api_key
-    
+    @plans = Plan.all
     #automatically renders index.html
   end
 
@@ -28,7 +28,8 @@ class AppController < ApplicationController
     def complete_oauth_flow
       if auth_session_valid?()
         token = @shopify_session.request_token(params)
-        @shop = Shop.create(token: token, shop_name: params[:shop])
+        plan = Plan.find_by name:"free-plan"
+        @shop = Shop.create(token: token, shop_name: params[:shop], plan_name:'free-plan', plan:plan)
         Nonce.find_by(shop_name:@shop.shop_name).update is_complete:true
       end
     end

@@ -10,7 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_15_132812) do
+ActiveRecord::Schema.define(version: 2021_03_15_173532) do
+
+  create_table "email_records", force: :cascade do |t|
+    t.datetime "sent"
+    t.string "subject"
+    t.string "to"
+    t.integer "shop_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["shop_id"], name: "index_email_records_on_shop_id"
+  end
 
   create_table "nonces", force: :cascade do |t|
     t.string "nonce"
@@ -28,6 +38,7 @@ ActiveRecord::Schema.define(version: 2021_03_15_132812) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "display_name"
     t.text "description"
+    t.integer "free_email_limit"
   end
 
   create_table "shops", force: :cascade do |t|
@@ -36,8 +47,10 @@ ActiveRecord::Schema.define(version: 2021_03_15_132812) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "plan_id"
+    t.string "plan_name"
     t.index ["plan_id"], name: "index_shops_on_plan_id"
   end
 
+  add_foreign_key "email_records", "shops"
   add_foreign_key "shops", "plans"
 end
