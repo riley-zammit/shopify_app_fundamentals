@@ -20,7 +20,7 @@ class BillingController < AuthenticatedController
 
         if monthly_emails_to_date.count > plan.free_email_limit
             #create a usage charge on Shopify for the email
-            shopify_create_usage_charge()
+            shopify_create_usage_charge(@shop.plan, "Email number #{}", @shop.shopify_subs_id)
         end
         #send the email
         email = stub_send_email()
@@ -28,11 +28,10 @@ class BillingController < AuthenticatedController
     end
 
 
-
     private
         def shopify_update_subscription(plan)
             #@shopify_gql_client instantiated in ApplicationController
-            UpdateSubsription = @shopify_gql_client.parse <<-'GRAPHQL'
+            update_subscription_query = @shopify_gql_client.parse <<-'GRAPHQL'
             mutation($name: String!, $amount: Decimal!, $cappedAmount:Decimal!, $returnUrl:URL!, $trialDays:Int){
                 appSubscriptionCreate(
                     test:true,
@@ -83,12 +82,12 @@ class BillingController < AuthenticatedController
                 trialDays: plan.trial_days
             }
 
-            result = @shopify_gql_client.query(UpdateSubsription, variables: variables)
-            return result
+            response = @shopify_gql_client.query(update_subscription_query, variables: variables)
+            return response.data
         end
 
-        def shopify_create_usage_charge(subscription_id)
-            UsageCharge = @shopify_gql_client.parse <<-'GRAPHQL'
+        def shopify_create_usage_charge(plan, description, shopify_subscription_id)
+            usage_charge_mutation = @shopify_gql_client.parse <<-'GRAPHQL'
             mutation($description:String!, $amount:Decimal!, $id:ID!){
                 appUsageRecordCreate(
                     subscriptionLineItemId:$id,
@@ -122,10 +121,18 @@ class BillingController < AuthenticatedController
                 }
             }
             GRAPHQL
+            
+            variables = {
+                amount:plan.cost_monthly,
+                description: description,
+                id: shopify_subscription_id
+            }
+            resopnse = @shopify_gql_client.query(usage_charge_mutation, variables:variables)
+            return response.data
         end
 
         def shopify_get_current_subscription
-            CurrentSubscriptionQuery = @shopify_gql_client.parse <<-'GRAPHQL'
+            current_subscription_query = @shopify_gql_client.parse <<-'GRAPHQL'
             query{
                 currentAppInstallation{
                     activeSubscriptions{
@@ -135,7 +142,7 @@ class BillingController < AuthenticatedController
                         lineItems{
                             plan{
                                 pricingDetails{
-                                    ...on AppRecurringPricing{
+                                    ... on AppRecurringPricing{
                                     interval
                                     price{
                                         amount
@@ -160,7 +167,8 @@ class BillingController < AuthenticatedController
             }
             GRAPHQL
 
-            response = @shopify_gql_client.query(CurrentSubscriptionQuery)
+            response = @shopify_gql_client.query(current_subscription_query)
+            return response.data
         end
 
 

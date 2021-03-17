@@ -6,9 +6,11 @@ class AppController < ApplicationController
   
     if !existing_installation()
       if new_auth_flow?()
+        setup_shopify_session()
         redirect_to controller: 'oauth', action: 'authenticate', shop: params[:shop], timestamp: params[:timestamp], hmac: params[:hmac] and return
       else
         complete_oauth_flow()
+        activate_shopify_session()
       end
     end
 

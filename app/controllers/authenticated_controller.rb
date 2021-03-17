@@ -1,8 +1,9 @@
 require 'jwt'
 class AuthenticationError < StandardError
 end
+
 class AuthenticatedController < ApplicationController
-    before_action :authenticate_user_request
+    before_action :authenticate_user_request, :activate_shopify_session
     rescue_from AuthenticationError, with: :unauthorized
     private
         def authenticate_user_request

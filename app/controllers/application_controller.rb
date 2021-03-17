@@ -1,29 +1,17 @@
 require 'shopify_api'
 require 'openssl'
 class ApplicationController < ActionController::Base
-    before_action :setup_or_activate_session
+    
     after_action :allow_iframe
 
 
     private
-        def setup_or_activate_session
-            #activate session if shop exists
-            if Shop.exists?(shop_name: params[:shop])
-                version = Rails.configuration.api_version
-                shop = Shop.find_by(shop_name: params[:shop])
-                @shopify_session = ShopifyAPI::Session.new(domain: shop.shop_name, token: shop.token, api_version: version)
-                ShopifyAPI::Base.activate_session(@shopify_session)
-                @shopify_gql_client = ShopifyAPI::GraphQL.client
-            else
-                ShopifyAPI::Session.setup(api_key: Rails.configuration.api_key, secret: Rails.configuration.api_secret)
-                @shopify_session = ShopifyAPI::Session.new(domain: params[:shop], api_version: Rails.configuration.api_version, token:nil)
-            end
-        end
-        
-        def authenticate_user_request
-            debug=0
-        end
 
+        def setup_shopify_session
+            ShopifyAPI::Session.setup(api_key: Rails.configuration.api_key, secret: Rails.configuration.api_secret)
+            @shopify_session = ShopifyAPI::Session.new(domain: params[:shop], api_version: Rails.configuration.api_version, token:nil)
+        end
+    
         #---methods to validate requests from shopify-----
         def authenticate_shopify_request
             unless hmac_valid?()
@@ -49,6 +37,21 @@ class ApplicationController < ActionController::Base
 
         def unauthorized
             render(file: "public/401.html", status: :unauthorized)
+        end
+
+        #-----authenticated methods------
+        def activate_shopify_session
+            unless @shop
+                unauthorized()
+            else
+                version = Rails.configuration.api_version
+                @shopify_session = ShopifyAPI::Session.new(domain: @shop.shop_name, token: @shop.token, api_version: version)
+                ShopifyAPI::Base.activate_session(@shopify_session)                
+                #remember to dump the schema with rake shopify_api:graphql:dump SHOP_DOMAIN=SHOP_NAME.myshopify.com ACCESS_TOKEN=abc API_VERSION=2021-01 or this call will fail
+                @shopify_gql_client = ShopifyAPI::GraphQL.client
+                debug=0  
+            end
+            
         end
     
 end
