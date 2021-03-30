@@ -40,7 +40,7 @@ class ApplicationController < ActionController::Base
         end
 
         #-----authenticated methods------
-        def activate_shopify_session
+        def activate_shopify_session()
             unless @shop
                 unauthorized()
             else
@@ -49,7 +49,6 @@ class ApplicationController < ActionController::Base
                 ShopifyAPI::Base.activate_session(@shopify_session)                
                 #remember to dump the schema with rake shopify_api:graphql:dump SHOP_DOMAIN=SHOP_NAME.myshopify.com ACCESS_TOKEN=abc API_VERSION=2021-01 or this call will fail
                 @shopify_gql_client = ShopifyAPI::GraphQL.client
-                debug=0  
             end
             
         end

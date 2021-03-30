@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_15_204836) do
+ActiveRecord::Schema.define(version: 2021_03_30_193925) do
 
   create_table "email_records", force: :cascade do |t|
     t.datetime "sent"
@@ -39,6 +39,8 @@ ActiveRecord::Schema.define(version: 2021_03_15_204836) do
     t.string "display_name"
     t.text "description"
     t.integer "free_email_limit"
+    t.boolean "default_plan"
+    t.integer "capped_amount"
   end
 
   create_table "shops", force: :cascade do |t|

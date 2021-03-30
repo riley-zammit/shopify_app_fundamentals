@@ -7,8 +7,9 @@ task :seed_plans => :environment do
             name:"free-plan",
             cost_monthly:0,
             trial_days:0,
-            description:"1 included email, $1.00 per email after that.",
-            free_email_limit: 1
+            description:"5 included email, $1.00 per email after that.",
+            free_email_limit: 5,
+            default_plan:true
         )
     end
 
@@ -19,7 +20,8 @@ task :seed_plans => :environment do
             cost_monthly:10,
             trial_days:7,
             description:"500 included emails, $1.00 per email after that.",
-            free_email_limit: 500
+            free_email_limit: 500,
+            default_plan: false
         )
     end
     
@@ -30,7 +32,8 @@ task :seed_plans => :environment do
             cost_monthly:50,
             trial_days:7,
             description:"Unlimited emails forever.",
-            free_email_limit: nil
+            free_email_limit: nil,
+            default_plan: false
         )
     end
     

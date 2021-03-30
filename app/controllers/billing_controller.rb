@@ -1,8 +1,9 @@
 class BillingController < AuthenticatedController
     
     def show
-        plan = shopify_get_current_subscription()
-        render json:{plan:plan}
+        subscription = shopify_get_current_subscription()
+        byebug
+        render(json:{plan:subscription})
     end
     
     def update
@@ -11,7 +12,7 @@ class BillingController < AuthenticatedController
         response = shopify_update_subscription(plan)
         @shop.update(shopify_subs_id: response.data.appSubscriptionCreate.appSubscription.id)
         #redirect the merchant to Shopify to accept the charge
-        redirect_to response.data.appSubscriptionCreate.confirmationUrl
+        redirect_to(response.data.appSubscriptionCreate.confirmationUrl)
     end
 
     def send_email_and_charge
@@ -24,7 +25,7 @@ class BillingController < AuthenticatedController
         end
         #send the email
         email = stub_send_email()
-        render json: {email: email}
+        render(json: {email: email}
     end
 
 
@@ -52,7 +53,7 @@ class BillingController < AuthenticatedController
                             plan:{
                                 appUsagePricingDetails:{
                                     cappedAmount:{
-                                        amount:1000,
+                                        amount: $cappedAmount,
                                         currencyCode: USD
                                     }
                                     terms:"terms example"
@@ -79,7 +80,8 @@ class BillingController < AuthenticatedController
                 name: plan.name, 
                 amount: plan.cost_monthly, 
                 returnUrl: Rails.configuration.app_root, 
-                trialDays: plan.trial_days
+                trialDays: plan.trial_days,
+                cappedAmount: plan.capped_amount/100
             }
 
             response = @shopify_gql_client.query(update_subscription_query, variables: variables)

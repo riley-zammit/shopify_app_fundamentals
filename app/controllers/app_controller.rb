@@ -5,12 +5,13 @@ class AppController < ApplicationController
   def index
   
     if !existing_installation()
+      setup_shopify_session()
       if new_auth_flow?()
-        setup_shopify_session()
         redirect_to controller: 'oauth', action: 'authenticate', shop: params[:shop], timestamp: params[:timestamp], hmac: params[:hmac] and return
       else
         complete_oauth_flow()
         activate_shopify_session()
+        activate_default_subscription()
       end
     end
 
@@ -18,10 +19,68 @@ class AppController < ApplicationController
     @shop_origin = @shop.shop_name
     @api_key = Rails.configuration.api_key
     @plans = Plan.all
-    #automatically renders index.html
+    
+    render(:index)
   end
 
   private
+    def activate_default_subscription
+      plan = Plan.find_by(default_plan: true)
+      create_subscription_query = @shopify_gql_client.parse <<-'GRAPHQL'
+        mutation($name: String!, $amount: Decimal!, $cappedAmount:Decimal!, $returnUrl:URL!, $trialDays:Int){
+                appSubscriptionCreate(
+                    test:true,
+                    name: $name,
+                    lineItems: [
+                        {
+                            plan:{
+                                appRecurringPricingDetails:{
+                                interval:EVERY_30_DAYS,
+                                price:{
+                                    amount: $amount,
+                                    currencyCode: USD
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            plan:{
+                                appUsagePricingDetails:{
+                                    cappedAmount:{
+                                        amount:$cappedAmount,
+                                        currencyCode: USD
+                                    }
+                                    terms:"terms example"
+                                }
+                            }
+                        }
+                    ]
+                    returnUrl: $returnUrl,
+                    trialDays: $trialDays
+                ){
+                    appSubscription{
+                        id
+                    }
+                    confirmationUrl
+                    userErrors{
+                        field
+                        message
+                    }
+                }
+            }
+      GRAPHQL
+
+      variables = {
+        name: plan.name, 
+        amount: plan.cost_monthly, 
+        returnUrl: Rails.configuration.app_root, 
+        trialDays: plan.trial_days,
+        cappedAmount:plan.capped_amount/100
+      }
+
+      response = @shopify_gql_client.query(create_subscription_query, variables: variables)
+    end
+
     def existing_installation
       Shop.exists?(shop_name: params[:shop])
     end
