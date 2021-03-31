@@ -2,7 +2,6 @@ class BillingController < AuthenticatedController
     
     def show
         subscription = shopify_get_current_subscription()
-        byebug
         render(json:{plan:subscription})
     end
     
@@ -25,7 +24,7 @@ class BillingController < AuthenticatedController
         end
         #send the email
         email = stub_send_email()
-        render(json: {email: email}
+        render(json: {email: email})
     end
 
 
@@ -33,7 +32,7 @@ class BillingController < AuthenticatedController
         def shopify_update_subscription(plan)
             #@shopify_gql_client instantiated in ApplicationController
             update_subscription_query = @shopify_gql_client.parse <<-'GRAPHQL'
-            mutation($name: String!, $amount: Decimal!, $cappedAmount:Decimal!, $returnUrl:URL!, $trialDays:Int){
+            mutation($name: String!, $amount: Decimal!, $cappedAmount:Decimal!, $returnUrl:URL!, $trialDays:Int, $terms:String){
                 appSubscriptionCreate(
                     test:true,
                     name: $name,
@@ -56,7 +55,7 @@ class BillingController < AuthenticatedController
                                         amount: $cappedAmount,
                                         currencyCode: USD
                                     }
-                                    terms:"terms example"
+                                    terms:$terms
                                 }
                             }
                         }
@@ -81,7 +80,8 @@ class BillingController < AuthenticatedController
                 amount: plan.cost_monthly, 
                 returnUrl: Rails.configuration.app_root, 
                 trialDays: plan.trial_days,
-                cappedAmount: plan.capped_amount/100
+                cappedAmount: plan.capped_amount/100,
+                terms: plan.description
             }
 
             response = @shopify_gql_client.query(update_subscription_query, variables: variables)
@@ -168,7 +168,6 @@ class BillingController < AuthenticatedController
                 }
             }
             GRAPHQL
-
             response = @shopify_gql_client.query(current_subscription_query)
             return response.data
         end

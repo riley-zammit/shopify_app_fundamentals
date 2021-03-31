@@ -11,8 +11,11 @@ class AppController < ApplicationController
       else
         complete_oauth_flow()
         activate_shopify_session()
-        activate_default_subscription()
+        subscription_approval_url = activate_default_subscription()
+        redirect_to(subscription_approval_url) and return
       end
+    elsif merchant_in_subscription_flow?
+
     end
 
     @shop=Shop.find_by(shop_name: params[:shop])
@@ -27,7 +30,7 @@ class AppController < ApplicationController
     def activate_default_subscription
       plan = Plan.find_by(default_plan: true)
       create_subscription_query = @shopify_gql_client.parse <<-'GRAPHQL'
-        mutation($name: String!, $amount: Decimal!, $cappedAmount:Decimal!, $returnUrl:URL!, $trialDays:Int){
+        mutation($name: String!, $amount: Decimal!, $cappedAmount:Decimal!, $returnUrl:URL!, $trialDays:Int, $terms:String) {
                 appSubscriptionCreate(
                     test:true,
                     name: $name,
@@ -50,7 +53,7 @@ class AppController < ApplicationController
                                         amount:$cappedAmount,
                                         currencyCode: USD
                                     }
-                                    terms:"terms example"
+                                    terms:$terms
                                 }
                             }
                         }
@@ -75,10 +78,16 @@ class AppController < ApplicationController
         amount: plan.cost_monthly, 
         returnUrl: Rails.configuration.app_root, 
         trialDays: plan.trial_days,
-        cappedAmount:plan.capped_amount/100
+        cappedAmount:plan.capped_amount/100,
+        terms: plan.description
       }
 
       response = @shopify_gql_client.query(create_subscription_query, variables: variables)
+      if response.data.app_subscription_create.user_errors.length == 0
+        return response.data.app_subscription_create.confirmation_url
+      else
+        raise "Error(s): #{response.data.app_subscription_create.user_errors.join(", ")}"
+      end
     end
 
     def existing_installation
