@@ -78,7 +78,7 @@ class BillingController < AuthenticatedController
             variables = {
                 name: plan.name, 
                 amount: plan.cost_monthly, 
-                returnUrl: Rails.configuration.app_root, 
+                returnUrl: "#{Rails.configuration.app_root}?shop=#{@shop.shop_name}", 
                 trialDays: plan.trial_days,
                 cappedAmount: plan.capped_amount/100,
                 terms: plan.description

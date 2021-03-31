@@ -1,6 +1,6 @@
 
 class AppController < ApplicationController
-  before_action :authenticate_shopify_request
+  before_action :authenticate_shopify_request, except: :billing_plan_accepted
 
   def index
   
@@ -14,8 +14,6 @@ class AppController < ApplicationController
         subscription_approval_url = activate_default_subscription()
         redirect_to(subscription_approval_url) and return
       end
-    elsif merchant_in_subscription_flow?
-
     end
 
     @shop=Shop.find_by(shop_name: params[:shop])
@@ -23,6 +21,16 @@ class AppController < ApplicationController
     @api_key = Rails.configuration.api_key
     @plans = Plan.all
     
+    render(:index)
+  end
+
+  def billing_plan_accepted
+    charge_id = params[:charge_id]
+    @shop = Shop.find_by(shop_name: params[:shop])
+    @shop_origin = @shop.shop_name
+    @api_key = Rails.configuration.api_key
+    @plans = Plan.all
+
     render(:index)
   end
 

@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   
   root 'app#index'
+  get '/plan_accepted', to: 'app#billing_plan_accepted'
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
   get '/auth', to: 'oauth#authenticate'
 
