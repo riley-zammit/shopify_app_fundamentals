@@ -1,0 +1,14 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Arial, sans-serif", "primaryColor": "#e3f1df", "primaryTextColor": "#202223", "primaryBorderColor": "#008060", "lineColor": "#6d7175", "background": "#ffffff"}}}%%
+classDiagram
+    direction TB
+
+    class ApplicationController
+    class OauthController
+    class AppController
+    class AuthenticatedController
+    class BillingController
+
+    ApplicationController <|-- OauthController
+    ApplicationController <|-- AppController
+    ApplicationController <|-- AuthenticatedController
+    AuthenticatedController <|-- BillingController

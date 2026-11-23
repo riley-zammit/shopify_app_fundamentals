@@ -1,0 +1,25 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Arial, sans-serif", "actorBkg": "#e3f1df", "actorBorder": "#008060", "actorTextColor": "#202223", "actorLineColor": "#8c9196", "signalColor": "#202223", "signalTextColor": "#202223", "labelBoxBkgColor": "#f6f6f7", "labelBoxBorderColor": "#8c9196", "labelTextColor": "#202223", "noteBkgColor": "#fff5c2", "noteBorderColor": "#c9a227", "noteTextColor": "#202223", "sequenceNumberColor": "#ffffff"}}}%%
+sequenceDiagram
+    autonumber
+    actor Merchant
+    participant Shopify as Shopify App Store / Admin
+    participant App as AppController
+    participant OAuth as OauthController
+
+    Merchant->>Shopify: Click Install app
+    Shopify->>App: GET app URL
+    App->>App: Check for existing installation
+
+    alt Existing installation
+        App-->>Merchant: Render main app
+    else New installation
+        App->>OAuth: Redirect to /auth
+        OAuth-->>Merchant: Render App Bridge redirect
+        Merchant->>Shopify: Open permission URL
+        Shopify-->>Merchant: Display OAuth consent screen
+        Merchant->>Shopify: Accept requested scopes
+        Shopify->>App: Redirect to app URL with code, state, and HMAC
+        App->>Shopify: Exchange authorization code
+        Shopify-->>App: Return access token
+        App-->>Merchant: Render main app
+    end
